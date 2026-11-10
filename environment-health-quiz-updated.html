@@ -1,2 +1,705 @@
 <!DOCTYPE html>
-<!-- temporary upload -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Environment &amp; Health — Quiz</title>
+<style>
+  :root{
+    --soil-dark:#16302A;
+    --soil-mid:#274E40;
+    --paper:#EDE8D8;
+    --paper-raised:#F6F3E8;
+    --clay:#B5652B;
+    --clay-deep:#8F4A1E;
+    --moss:#4F7A5B;
+    --moss-light:#7FA187;
+    --ink:#1C2321;
+    --wrong:#A33B2B;
+    --line: rgba(22,48,42,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height:100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .app{
+    max-width:520px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:0 18px 28px;
+  }
+  header.top{
+    padding:22px 2px 14px;
+    position:sticky;
+    top:0;
+    background:var(--paper);
+    z-index:5;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+  }
+  .brand h1{
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:0.2px;
+    margin:0;
+    color:var(--soil-dark);
+  }
+  .brand .count{
+    font-size:13px;
+    color:var(--soil-mid);
+    font-variant-numeric: tabular-nums;
+  }
+  .stem{
+    margin-top:12px;
+    height:6px;
+    border-radius:4px;
+    background: var(--line);
+    overflow:hidden;
+    position:relative;
+  }
+  .stem-fill{
+    height:100%;
+    background: linear-gradient(90deg, var(--moss), var(--clay));
+    width:0%;
+    transition: width .35s ease;
+    border-radius:4px;
+  }
+
+  /* ---- Screens ---- */
+  .screen{ display:none; flex:1; flex-direction:column; }
+  .screen.active{ display:flex; }
+
+  /* Intro */
+  .intro{ justify-content:center; align-items:stretch; text-align:left; padding-top:8px;}
+  .intro .kicker{
+    color:var(--clay-deep);
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  .intro h2{
+    font-family: Georgia, "Iowan Old Style", serif;
+    font-size:32px;
+    line-height:1.15;
+    margin:0 0 14px;
+    color:var(--soil-dark);
+  }
+  .intro p{
+    font-size:15px;
+    line-height:1.55;
+    color:var(--soil-mid);
+    margin:0 0 24px;
+  }
+  .stat-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:28px;
+  }
+  .stat{
+    flex:1;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 12px;
+  }
+  .stat .n{
+    font-family: Georgia, serif;
+    font-size:24px;
+    color:var(--soil-dark);
+    display:block;
+  }
+  .stat .l{
+    font-size:12px;
+    color:var(--soil-mid);
+  }
+  .len-picker{
+    margin-bottom:22px;
+  }
+  .len-picker .label{
+    font-size:13px;
+    color:var(--soil-mid);
+    margin-bottom:8px;
+    display:block;
+  }
+  .len-options{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .len-btn{
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    color:var(--soil-dark);
+    padding:9px 14px;
+    border-radius:20px;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .len-btn.selected{
+    background:var(--soil-dark);
+    color:var(--paper);
+    border-color:var(--soil-dark);
+  }
+
+  .btn-primary{
+    background:var(--clay);
+    color:#fff;
+    border:none;
+    padding:16px;
+    border-radius:10px;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    width:100%;
+  }
+  .btn-primary:active{ background:var(--clay-deep); }
+  .btn-ghost{
+    background:transparent;
+    color:var(--soil-dark);
+    border:1px solid var(--line);
+    padding:14px;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    width:100%;
+  }
+
+  /* Quiz */
+  .quiz{ padding-top:6px; }
+  .q-tag{
+    font-size:12px;
+    color:var(--moss);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .q-text{
+    font-family: Georgia, "Iowan Old Style", serif;
+    font-size:21px;
+    line-height:1.35;
+    color:var(--soil-dark);
+    margin:0 0 22px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .opt{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-align:left;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 14px;
+    font-size:15px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .opt .tag{
+    flex:0 0 auto;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:700;
+    color:var(--soil-mid);
+    background:var(--paper);
+  }
+  .opt .txt{ flex:1; line-height:1.4; }
+  .opt.selected{
+    border-color:var(--moss);
+    background: rgba(79,122,91,0.10);
+  }
+  .opt.selected .tag{
+    background:var(--moss);
+    color:#fff;
+    border-color:var(--moss);
+  }
+  .opt.correct{
+    border-color:var(--moss);
+    background: rgba(79,122,91,0.16);
+  }
+  .opt.correct .tag{ background:var(--moss); color:#fff; border-color:var(--moss); }
+  .opt.wrong{
+    border-color:var(--wrong);
+    background: rgba(163,59,43,0.10);
+  }
+  .opt.wrong .tag{ background:var(--wrong); color:#fff; border-color:var(--wrong); }
+  .opt.disabled{ cursor:default; }
+
+  .feedback{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-radius:10px;
+    padding:13px 14px;
+    font-size:15px;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .feedback .ic{
+    flex:0 0 auto;
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    color:#fff;
+  }
+  .feedback.good{ background: rgba(79,122,91,0.16); color:var(--moss); }
+  .feedback.good .ic{ background:var(--moss); }
+  .feedback.bad{ background: rgba(163,59,43,0.12); color:var(--wrong); }
+  .feedback.bad .ic{ background:var(--wrong); }
+  .feedback .txt{ line-height:1.4; }
+  .feedback .txt b{ display:block; font-size:13px; font-weight:600; opacity:.85; margin-top:2px; }
+
+  .quiz-nav{
+    margin-top:auto;
+    display:flex;
+    gap:10px;
+    padding-top:10px;
+  }
+  .quiz-nav .btn-primary[disabled]{
+    background: var(--moss-light);
+    opacity:.6;
+  }
+
+  /* Report */
+  .report{ padding-top:10px; }
+  .score-hero{
+    text-align:center;
+    padding:26px 10px 22px;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:14px;
+    margin-bottom:20px;
+  }
+  .score-hero .pct{
+    font-family: Georgia, serif;
+    font-size:52px;
+    color:var(--soil-dark);
+    line-height:1;
+  }
+  .score-hero .frac{
+    font-size:14px;
+    color:var(--soil-mid);
+    margin-top:8px;
+  }
+  .score-hero .verdict{
+    margin-top:14px;
+    display:inline-block;
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:700;
+  }
+  .verdict.high{ background: rgba(79,122,91,0.18); color:var(--moss); }
+  .verdict.mid{ background: rgba(181,101,43,0.16); color:var(--clay-deep); }
+  .verdict.low{ background: rgba(163,59,43,0.14); color:var(--wrong); }
+
+  .review-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--soil-mid);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin:6px 0 10px;
+  }
+  .review-item{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    background:var(--paper-raised);
+  }
+  .review-item .rq{
+    font-size:14px;
+    color:var(--soil-dark);
+    margin-bottom:8px;
+    line-height:1.4;
+  }
+  .review-item .ra{
+    font-size:13px;
+    line-height:1.5;
+  }
+  .review-item .ra .your{ color:var(--wrong); }
+  .review-item .ra .ans{ color:var(--moss); font-weight:600; }
+  .review-item.ok{ border-color: var(--line); }
+
+  .report-actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:8px;
+    margin-bottom:24px;
+  }
+
+  footer.hint{
+    text-align:center;
+    font-size:12px;
+    color:var(--soil-mid);
+    padding-top:6px;
+    opacity:.7;
+  }
+
+/* Modern dark-first study interface */
+:root{--soil-dark:#173c37;--soil-mid:#52746e;--paper:#f2f5f2;--paper-raised:#ffffff;--clay:#d97745;--clay-deep:#b9572c;--moss:#23856b;--moss-light:#71aa94;--ink:#172421;--wrong:#d45d5d;--line:rgba(30,70,62,.14)}
+body{background:var(--paper);transition:background .25s,color .25s}
+.app{max-width:620px;padding:0 20px 34px}
+header.top{background:var(--paper);backdrop-filter:blur(16px);padding:18px 2px 15px}
+.brand h1{font-family:inherit;font-size:17px;font-weight:750;letter-spacing:-.3px}
+.brand .count{font-weight:700}
+.top-actions,.intro-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.theme-toggle{border:1px solid var(--line);border-radius:999px;background:var(--paper-raised);color:var(--soil-dark);padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.theme-toggle.compact{padding:7px 10px;font-size:16px}
+.intro{justify-content:center}
+.intro h2{font-family:inherit;font-size:clamp(30px,7vw,40px);font-weight:800;letter-spacing:-1.4px;line-height:1.08}
+.intro p{color:var(--soil-mid);max-width:470px}
+.kicker{letter-spacing:1.2px;text-transform:uppercase;font-size:11px!important}
+.stat{border-radius:16px;padding:17px;background:var(--paper-raised);box-shadow:0 8px 25px rgba(20,50,40,.04)}
+.stat .n{font-family:inherit;font-weight:800}
+.len-picker{background:var(--paper-raised);padding:16px;border:1px solid var(--line);border-radius:16px}
+.len-btn{border-radius:12px;font-weight:700;padding:10px 16px}
+.btn-primary{border-radius:14px;background:linear-gradient(135deg,var(--clay),var(--clay-deep));box-shadow:0 8px 18px rgba(181,101,43,.18)}
+.btn-ghost{border-radius:14px}
+.stem{height:7px;border-radius:99px}
+.stem-fill{background:linear-gradient(90deg,#20a17d,#e28a52)}
+.q-tag{letter-spacing:1.1px;text-transform:uppercase;font-size:11px}
+.q-text{font-family:inherit;font-size:clamp(21px,5vw,25px);font-weight:750;letter-spacing:-.45px;line-height:1.35;margin-bottom:12px}
+.cue-note{font-size:12px;color:var(--soil-mid);margin:0 0 18px}
+.cue-word{background:rgba(217,119,69,.18);color:var(--clay-deep);border-radius:5px;padding:1px 4px;text-decoration:underline;text-decoration-color:var(--clay);text-decoration-thickness:2px;text-underline-offset:3px}
+.opt{border-radius:14px;padding:15px;background:var(--paper-raised);transition:transform .15s,border-color .15s;box-shadow:0 3px 12px rgba(20,50,40,.025)}
+.opt:active{transform:scale(.99)}
+.opt .tag{width:30px;height:30px;font-size:12px;font-weight:800}
+.feedback{border-radius:14px;line-height:1.45}
+.feedback .txt b{margin-top:7px;line-height:1.5}
+.score-hero{border-radius:20px;padding:30px 16px;background:var(--paper-raised)}
+.review-item{border-radius:14px;background:var(--paper-raised)}
+footer.hint{padding:18px 0;color:var(--soil-mid)}
+body.dark{--soil-dark:#e4f2ed;--soil-mid:#a0b9b1;--paper:#101a19;--paper-raised:#1a2927;--clay:#e58b59;--clay-deep:#f0a477;--moss:#56bd98;--moss-light:#367d67;--ink:#e5efeb;--wrong:#ff8585;--line:rgba(205,235,224,.13);background:var(--paper);color:var(--ink)}
+body.dark header.top{background:rgba(16,26,25,.94)}
+body.dark .opt{box-shadow:none}
+body.dark .cue-word{background:rgba(229,139,89,.18);color:#ffc09a}
+body.dark .btn-ghost{color:var(--soil-dark)}
+body.dark .feedback.good{color:#7be0b8}
+body.dark .feedback.bad{color:#ff9b9b}
+@media(min-width:600px){.app{padding-left:26px;padding-right:26px}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top" id="topBar" style="display:none;">
+    <div class="brand">
+      <h1>Environment &amp; Health</h1>
+      <div class="top-actions"><button class="theme-toggle compact" id="themeToggleQuiz" type="button" aria-label="Toggle theme">☾</button><span class="count" id="progressCount">1 / 10</span></div>
+    </div>
+    <div class="stem"><div class="stem-fill" id="progressFill"></div></div>
+  </header>
+
+  <!-- INTRO -->
+  <section class="screen active intro" id="screen-intro">
+    <div class="intro-top"><div class="kicker">SMART PRACTICE · ACTIVE RECALL</div><button class="theme-toggle" id="themeToggleIntro" type="button">☾ Dark mode</button></div>
+    <h2>Environment &amp; Health practice quiz</h2>
+    <p>Air pollution, environmental issues, HIV/AIDS and public health — drawn from your question bank. Pick a length and go.</p>
+    <div class="stat-row">
+      <div class="stat"><span class="n" id="bankSize">—</span><span class="l">questions in bank</span></div>
+      <div class="stat"><span class="n">MCQ</span><span class="l">single best answer</span></div>
+    </div>
+    <div class="len-picker">
+      <span class="label">How many questions?</span>
+      <div class="len-options" id="lenOptions"></div>
+    </div>
+    <button class="btn-primary" id="startBtn">Start quiz</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen quiz" id="screen-quiz">
+    <div class="q-tag" id="qTag">QUESTION 1</div>
+    <div class="q-text" id="qText"></div><div class="cue-note" id="cueNote">Look for the highlighted clue word.</div>
+    <div class="options" id="qOptions"></div>
+    <div class="feedback" id="feedback" style="display:none;"></div>
+    <div class="quiz-nav">
+      <button class="btn-primary" id="nextBtn" disabled>Answer to continue</button>
+    </div>
+  </section>
+
+  <!-- REPORT -->
+  <section class="screen report" id="screen-report">
+    <div class="score-hero">
+      <div class="pct" id="scorePct">0%</div>
+      <div class="frac" id="scoreFrac">0 of 0 correct</div>
+      <div class="verdict" id="scoreVerdict">—</div>
+    </div>
+    <div class="review-title">Review</div>
+    <div id="reviewList"></div>
+    <div class="report-actions">
+      <button class="btn-primary" id="retryBtn">Retry test</button>
+      <button class="btn-ghost" id="newSetBtn">Choose a new length</button>
+    </div>
+  </section>
+
+  <footer class="hint">Works fully offline · save this page to your phone</footer>
+</div>
+
+<script>
+const BANK = [{"q": "What is a primary source of outdoor air pollution?", "options": ["Volcanic eruptions", "Forest fires", "Industrial emissions", "Naturally occurring ozone"], "answer": 2}, {"q": "Which of the following is a common greenhouse gas responsible for global warming and climate change?", "options": ["Nitrogen dioxide (NO2)", "Carbon monoxide (CO)", "Sulfur dioxide (SO2)", "Carbon dioxide (CO2)"], "answer": 3}, {"q": "What is the main source of indoor air pollution in many homes?", "options": ["Car exhaust", "Tobacco smoke", "Industrial emissions", "Pesticides"], "answer": 1}, {"q": "Ground-level ozone, a major air pollutant, is formed through chemical reactions involving:", "options": ["Methane (CH4) and sulfur dioxide (SO2)", "Nitrogen oxides (NOx) and volatile organic compounds (VOCs)", "Carbon dioxide (CO2) and carbon monoxide (CO)", "Oxygen (O2) and nitrogen (N2)"], "answer": 1}, {"q": "Particulate matter (PM) in the air can include:", "options": ["Gaseous pollutants", "Tiny solid particles or liquid droplets", "Harmless dust particles", "Invisible odors"], "answer": 1}, {"q": "Which of the following is a health effect associated with exposure to high levels of air pollution, especially in urban areas?", "options": ["Reduced risk of respiratory diseases", "Improved cardiovascular health", "Increased risk of asthma and lung cancer", "Enhanced immune system function"], "answer": 2}, {"q": "Acid rain is primarily caused by the release of which pollutants into the atmosphere?", "options": ["Carbon dioxide (CO2) and methane (CH4)", "Sulfur dioxide (SO2) and nitrogen oxides (NOx)", "Ozone (O3) and carbon monoxide (CO)", "Lead (Pb) and mercury (Hg)"], "answer": 1}, {"q": "Which of the following human activities is a major contributor to air pollution associated with transportation?", "options": ["Walking and cycling", "Using public transportation", "Driving gasoline and diesel-powered vehicles", "Telecommuting from home"], "answer": 2}, {"q": "What is the purpose of emission control devices in vehicles?", "options": ["To increase fuel consumption", "To reduce air pollution by capturing and treating exhaust emissions", "To lower vehicle performance", "To increase the production of greenhouse gases"], "answer": 1}, {"q": "Which international agreement aims to reduce greenhouse gas emissions and combat climate change?", "options": ["The Clean Air Act", "The Montreal Protocol", "The Kyoto Protocol", "The Superfund Act"], "answer": 2}, {"q": "Land pollution is primarily caused by the improper disposal of:", "options": ["Greenhouse gases", "Hazardous waste", "Noise pollution", "Air pollutants"], "answer": 1}, {"q": "Which of the following is a common source of land pollution in urban areas?", "options": ["Organic farming practices", "Recycling programs", "Landfills and dumping of solid waste", "Reforestation efforts"], "answer": 2}, {"q": "What is a significant environmental concern associated with land pollution?", "options": ["Increased soil fertility", "Contamination of groundwater", "Enhanced biodiversity", "Carbon sequestration"], "answer": 1}, {"q": "The process of leaching in land pollution refers to:", "options": ["The spread of disease from contaminated soil", "The removal of topsoil by erosion", "The release of pollutants into the soil, which can then enter groundwater", "The decomposition of organic matter in the soil"], "answer": 2}, {"q": "What is an example of a non-point source of land pollution?", "options": ["A leaking chemical storage tank", "An industrial wastewater discharge pipe", "Runoff from agricultural fields carrying pesticides and fertilizers", "A controlled landfill site"], "answer": 2}, {"q": "Which of the following is a common consequence of soil pollution?", "options": ["Increased agricultural productivity", "Improved water quality in nearby rivers and lakes", "Reduced crop yields and contaminated food", "Enhanced wildlife habitat"], "answer": 2}, {"q": "Land pollution can negatively impact human health through exposure to contaminated soil and water. Which of the following is a potential health effect of exposure to contaminated land?", "options": ["Improved immune system function", "Increased risk of cancer and respiratory diseases", "Better overall well-being", "Enhanced resistance to allergies"], "answer": 1}, {"q": "How can individuals help reduce land pollution in their communities?", "options": ["By increasing the use of disposable plastic products", "By participating in litter cleanup programs", "By burying hazardous waste in their backyard", "By using pesticides and fertilizers liberally in their gardens"], "answer": 1}, {"q": "What is the purpose of waste segregation in waste management practices?", "options": ["To increase the amount of waste sent to landfills", "To mix all types of waste together for easy disposal", "To separate recyclables from non-recyclables for proper disposal", "To promote the dumping of waste in water bodies"], "answer": 2}, {"q": "Which international agreement aims to combat land degradation and improve land use practices?", "options": ["The Clean Air Act", "The Paris Agreement", "The Kyoto Protocol", "The United Nations Convention to Combat Desertification (UNCCD)"], "answer": 3}, {"q": "What is a common source of point source water pollution?", "options": ["Runoff from agricultural fields", "Industrial wastewater discharges", "Non-point source pollution", "Natural erosion"], "answer": 1}, {"q": "The contamination of water bodies by substances that cause harm to living organisms is referred to as:", "options": ["Water scarcity", "Water pollution", "Water erosion", "Water sedimentation"], "answer": 1}, {"q": "Which of the following is a non-point source of water pollution?", "options": ["A sewage treatment plant", "A chemical spill from a factory", "Urban stormwater runoff", "A leaking oil tanker"], "answer": 2}, {"q": "The excessive growth of algae in water bodies due to nutrient pollution is known as:", "options": ["Acid rain", "Eutrophication", "Desalination", "Groundwater contamination"], "answer": 1}, {"q": "What is a common consequence of water pollution for aquatic ecosystems?", "options": ["Increased biodiversity", "Enhanced fish populations", "Decline in aquatic species and habitat degradation", "Improved water quality"], "answer": 2}, {"q": "What type of water pollution occurs when warm water is discharged into a water body, causing a rise in temperature and negatively impacting aquatic life?", "options": ["Thermal pollution", "Noise pollution", "Sediment pollution", "Pathogenic pollution"], "answer": 0}, {"q": "Which of the following pollutants is a heavy metal known to cause severe water pollution, especially in industrial areas?", "options": ["Nitrogen", "Phosphorus", "Lead", "Organic matter"], "answer": 2}, {"q": "The Clean Water Act in the United States is aimed at:", "options": ["Promoting water pollution and waste disposal", "Regulating air quality standards", "Controlling water pollution and ensuring water quality", "Encouraging land development near water bodies"], "answer": 2}, {"q": "What is the primary purpose of a wastewater treatment plant?", "options": ["To release untreated sewage directly into water bodies", "To remove hazardous chemicals from industrial wastewater", "To treat and purify sewage and industrial effluents before discharge", "To generate electricity from water pollution"], "answer": 2}, {"q": "Which international agreement aims to protect and manage the world's water resources and improve water quality?", "options": ["The Clean Water Act", "The Kyoto Protocol", "The Stockholm Convention on Persistent Organic Pollutants", "The United Nations Watercourses Convention"], "answer": 3}, {"q": "Radioactive pollution primarily results from the release of:", "options": ["Carbon dioxide", "Heavy metals", "Radioactive materials", "Pesticides"], "answer": 2}, {"q": "What is the primary source of anthropogenic (human-made) radioactive pollution?", "options": ["Volcanic eruptions", "Nuclear power plants and nuclear weapons testing", "Forest fires", "Lightning strikes"], "answer": 1}, {"q": "Which of the following types of radiation consists of high-energy particles and is the most damaging to living organisms?", "options": ["Alpha radiation", "Beta radiation", "Gamma radiation", "X-rays"], "answer": 0}, {"q": "What is a potential health effect of exposure to ionizing radiation?", "options": ["Improved immune system function", "Increased risk of cancer and genetic mutations", "Enhanced resistance to infectious diseases", "Reduced risk of cardiovascular diseases"], "answer": 1}, {"q": "Radioactive pollution can result in contamination of air, water, and soil. Which of the following is a common pathway for the entry of radioactive materials into the human body?", "options": ["Inhalation of radioactive particles", "Consumption of contaminated food and water", "Skin contact with radioactive materials", "All of the above"], "answer": 3}, {"q": "Radioactive half-life is a measure of:", "options": ["The time it takes for radioactive materials to become non-radioactive", "The time it takes for radiation levels to double", "The time it takes for radiation to reach its maximum intensity", "The time it takes for radioactive materials to decay to half their original amount"], "answer": 3}, {"q": "The Fukushima Daiichi nuclear disaster in 2011, following a massive earthquake and tsunami, resulted in the release of radioactive materials.What type of radiation was primarily released in this incident?", "options": ["Alpha radiation", "Beta radiation", "Gamma radiation", "Ultraviolet radiation"], "answer": 2}, {"q": "What is the term for the protective barrier or shielding used to reduce exposure to ionizing radiation in nuclear facilities and medical applications?", "options": ["Dosimeter", "Geiger counter", "Radiosensitive material", "Lead apron"], "answer": 3}, {"q": "Which of the following international agreements aims to regulate and promote the safe use of nuclear energy and prevent nuclear weapons proliferation?", "options": ["The Nuclear Non-Proliferation Treaty (NPT)", "The Paris Agreement", "The Kyoto Protocol", "The Convention on Biological Diversity"], "answer": 0}, {"q": "Radioactive pollution can persist for a long time due to the radioactive decay of materials. The cleanup and management of radioactive waste is a significant challenge and is typically regulated by:", "options": ["The Clean Air Act", "The Clean Water Act", "The Nuclear Regulatory Commission (NRC)", "The Environmental Protection Agency (EPA)"], "answer": 2}, {"q": "What is the primary cause of acid rain?", "options": ["Natural volcanic emissions", "Industrial and vehicular emissions of sulfur dioxide and nitrogen oxides", "Forest fires", "Agricultural practices"], "answer": 1}, {"q": "Acid rain is characterized by the presence of which acidic components in precipitation?", "options": ["Carbonic acid and nitric acid", "Hydrochloric acid and sulfuric acid", "Sulfuric acid and nitric acid", "Phosphoric acid and acetic acid"], "answer": 2}, {"q": "Acid rain can have harmful effects on aquatic ecosystems by:", "options": ["Increasing water clarity and promoting aquatic life", "Reducing the pH of water bodies and harming aquatic life", "Promoting the growth of algae in lakes", "Enhancing the health of fish populations"], "answer": 1}, {"q": "Which of the following is not a common effect of acid rain on terrestrial ecosystems?", "options": ["Soil acidification", "Damage to buildings and monuments", "Enhanced plant growth", "Forest decline"], "answer": 2}, {"q": "The pH scale measures the acidity or alkalinity of a substance, with values below 7 indicating acidity. What is the typical pH of acid rain?", "options": ["pH 5 to 6", "pH 7 (neutral)", "pH 8 to 9", "pH 4 or lower"], "answer": 3}, {"q": "Acid rain can accelerate the corrosion of buildings and statues made of", "options": ["Concrete and steel", "Wood and plastic", "Glass and ceramics", "Aluminum and gold"], "answer": 0}, {"q": "The term \"acid deposition\" refers to the combination of acid rain and other forms of acidic deposition, such as", "options": ["Acidic foods", "Acidic soil", "Acidic fog and dry deposition", "Acidic rivers"], "answer": 2}, {"q": "Acid rain can be transported over long distances, which means that the source of emissions and the location of its effects may be quite far apart. What is the term for this phenomenon?", "options": ["Acid precipitation", "Local pollution", "Atmospheric transport", "Long-range transport"], "answer": 3}, {"q": "Which international agreement aimed to reduce sulfur dioxide emissions in order to combat acid rain in Europe?", "options": ["The Clean Water Act", "The Kyoto Protocol", "The Montreal Protocol", "The Gothenburg Protocol"], "answer": 3}, {"q": "What role human plays in food chains?", "options": ["Humans do not involve in food chains", "Producers", "Decomposers", "Consumers"], "answer": 3}, {"q": "What does HIV stand for?", "options": ["Human Immunodeficiency Virus", "Highly Infectious Virus", "Hereditary Inflammatory Virus", "Human Influenza Virus"], "answer": 0}, {"q": "How is HIV primarily transmitted from one person to another?", "options": ["Through casual contact such as shaking hands", "Through mosquito bites", "Through sexual contact, blood-to-blood contact, and from mother to child during childbirth or breastfeeding", "Through sharing utensils"], "answer": 2}, {"q": "Which of the following is NOT a common way to prevent the transmission of HIV?", "options": ["Practicing safe sex by using condoms", "Regular handwashing with soap", "Using sterile needles and syringes", "Taking pre-exposure prophylaxis (PrEP) medication"], "answer": 1}, {"q": "What is the final stage of HIV infection, where the immune system is severely damaged, and opportunistic infections are common?", "options": ["Acute HIV infection", "Asymptomatic HIV infection", "AIDS (Acquired Immunodeficiency Syndrome)", "HIV negative status"], "answer": 2}, {"q": "Which of the following is NOT a common symptom of acute HIV infection?", "options": ["Fever", "Swollen lymph nodes", "Skin rash", "Chronic cough"], "answer": 3}, {"q": "Which type of white blood cells are primarily targeted and depleted by HIV?", "options": ["Platelets", "T cells (CD4 cells)", "B cells", "Neutrophils"], "answer": 1}, {"q": "What is the main goal of antiretroviral therapy (ART) for HIV-infected individuals?", "options": ["To cure HIV infection", "To prevent the transmission of HIV to others", "To manage HIV and slow disease progression", "To promote risky behaviors"], "answer": 2}, {"q": "Which of the following statements about HIV is true?", "options": ["HIV can be spread through casual contact like hugging and shaking hands.", "HIV can only be transmitted through sexual contact.", "There is currently a vaccine available that provides complete protection against HIV.", "HIV can be present in the body for years without causing symptoms."], "answer": 3}, {"q": "What does the acronym \"UNAIDS\" stand for?", "options": ["United Nations Agency for International Development and Support", "United Nations Acquired Immunodeficiency Syndrome", "United Nations Program on HIV/AIDS", "Universal Network for AIDS Support"], "answer": 2}, {"q": "In which year was the first case of AIDS officially recognized and reported in the United States?", "options": ["1965", "1979", "1981", "1995"], "answer": 2}, {"q": "What is the current estimated global population as of 2021?", "options": ["3 billion", "5 billion", "7.9 billion", "10 billion"], "answer": 2}, {"q": "The study of human population size, distribution, and composition is known as", "options": ["Demographics", "Geography", "Anthropology", "Sociology"], "answer": 0}, {"q": "What term is used to describe the number of live births per 1,000 people in a population in a given year?", "options": ["Mortality rate", "Fertility rate", "Growth rate", "Migration rate"], "answer": 1}, {"q": "The \"replacement-level fertility\" refers to", "options": ["The number of children needed to maintain the current population size", "The maximum number of children a woman can have", "The number of children required for a couple to achieve social status", "The number of children born in developed countries"], "answer": 0}, {"q": "What is the term for the movement of people in and out of a particular region?", "options": ["Birth rate", "Death rate", "Immigration and emigration", "Natural increase"], "answer": 2}, {"q": "Which of the following countries is an example of a country with a declining population due to a low birth rate and an aging population?", "options": ["India", "China", "Japan", "Nigeria"], "answer": 2}, {"q": "What does the term \"urbanization\" refer to?", "options": ["The increase in the population of rural areas", "The growth of small towns", "The migration of people from rural to urban areas", "The decrease in the population of urban areas"], "answer": 2}, {"q": "The demographic transition model is a theory that describes the relationship between population growth and", "options": ["Climate change", "Economic development", "Education levels", "Political stability"], "answer": 1}, {"q": "Which of the following factors is a common driver of high population growth in developing countries?", "options": ["Access to family planning services", "High levels of education for women", "High infant mortality rates", "Economic prosperity"], "answer": 2}, {"q": "What is the term for a sudden, sharp reduction in the size of a population, often associated with a catastrophic event?", "options": ["Population explosion", "Demographic transition", "Population bottleneck", "Demographic dividend"], "answer": 2}, {"q": "In which year was the Wildlife Protection Act, 1972, enacted in India?", "options": ["1967", "1972", "1980", "1990"], "answer": 1}, {"q": "What is the primary objective of the Wildlife Protection Act, 1972, in India?", "options": ["To promote wildlife trade", "To protect wildlife and their habitats", "To encourage hunting for sport", "To establish wildlife reserves for commercial purposes"], "answer": 1}, {"q": "Which authority is responsible for the enforcement of the Wildlife Protection Act, 1972, in India?", "options": ["Ministry of Agriculture", "Ministry of Environment and Forests", "Ministry of Defense", "Ministry of Education"], "answer": 1}, {"q": "The Wildlife Protection Act, 1972, classifies wildlife into several schedules. Which schedule includes the most endangered species and offers them the highest level of protection?", "options": ["Schedule I", "Schedule II", "Schedule III", "Schedule IV"], "answer": 0}, {"q": "What is the term for the protected areas in India where hunting, poaching, and other forms of exploitation of wildlife are prohibited?", "options": ["Wildlife sanctuaries", "National parks", "Eco-tourism zones", "Reserved forests"], "answer": 1}, {"q": "Under the Wildlife Protection Act, 1972, what is the penalty for the illegal hunting and poaching of wildlife species listed in Schedule I?", "options": ["A small fine", "Community service", "Imprisonment and heavy fines", "No penalty"], "answer": 2}, {"q": "Which of the following activities is permitted under the Wildlife Protection Act, 1972, in wildlife sanctuaries?", "options": ["Commercial logging", "Ecotourism", "Industrial development", "Agriculture"], "answer": 1}, {"q": "Which organization in India is responsible for the conservation of endangered species and their habitats?", "options": ["Indian Wildlife Federation", "World Wildlife Fund (WWF)", "Wildlife Trust of India", "National Tiger Conservation Authority"], "answer": 2}, {"q": "The Wildlife Protection Act, 1972, plays a significant role in the conservation of which iconic large cat species in India?", "options": ["Snow leopard", "Cheetah", "Bengal tiger", "Asiatic lion"], "answer": 2}, {"q": "In addition to protecting wildlife, the Wildlife Protection Act, 1972, also includes provisions for", "options": ["Promoting the trade of wildlife products", "Regulating the import of exotic pets", "Establishing breeding programs for endangered species", "Regulating hunting for traditional tribal practices"], "answer": 1}, {"q": "In which year was the Environmental Protection Act, 1986, enacted in India?", "options": ["1962", "1972", "1986", "1996"], "answer": 2}, {"q": "What is the primary objective of the Environmental Protection Act, 1986, in India?", "options": ["To promote industrial growth at any cost", "To ensure unrestricted exploitation of natural resources", "To protect and improve the quality of the environment", "To encourage pollution and waste disposal"], "answer": 2}, {"q": "Which authority is responsible for the enforcement of the Environmental Protection Act, 1986, in India?", "options": ["Ministry of Agriculture", "Ministry of Environment, Forest and Climate Change", "Ministry of Education", "Ministry of Industry"], "answer": 1}, {"q": "The Environmental Protection Act, 1986, empowers the central government to take measures to protect and improve environmental quality. What is the term for the set of guidelines that the central government may issue under this act?", "options": ["Environmental guidelines", "Environmental impact assessments", "Environmental standards", "Environmental management plans"], "answer": 2}, {"q": "Under the Environmental Protection Act, 1986, which authority is responsible for the prevention and control of water pollution in India?", "options": ["Central Pollution Control Board (CPCB)", "State Pollution Control Boards (SPCBs)", "Ministry of Health and Family Welfare", "Ministry of Agriculture"], "answer": 0}, {"q": "The term \"environmental impact assessment\" (EIA) is an important component of environmental protection. What is the main purpose of an EIA?", "options": ["To promote industrial development without regard to environmental impact", "To assess the impact of human activities on the environment and suggest measures for mitigation", "To prioritize economic growth over environmental concerns", "To regulate all forms of environmental impact"], "answer": 1}, {"q": "What is the term for the study of the impact of a proposed project or development on the environment, including its social, cultural, and economic aspects? A. Environmental audit", "options": ["Environmental impact assessment (EIA)", "Environmental standardization", "Environmental regulation"], "answer": 0}, {"q": "The Environmental Protection Act, 1986, provides legal provisions for the regulation of hazardous substances. Which authority is responsible for regulating hazardous substances under this act?", "options": ["Ministry of Agriculture", "Ministry of Defense", "Central Pollution Control Board (CPCB)", "State Pollution Control Boards (SPCBs)"], "answer": 3}, {"q": "The \"polluter pays principle\" is a key concept in environmental protection, meaning that", "options": ["Polluters should not be held financially responsible for their actions", "Governments are solely responsible for the costs of pollution prevention and cleanup", "Polluters should bear the costs of preventing and mitigating pollution", "Pollution should be encouraged for economic growth"], "answer": 2}, {"q": "Which international agreement on environmental protection and climate change influenced India's environmental policies and legislation, including the Environmental Protection Act, 1986?", "options": ["The Clean Air Act", "The Kyoto Protocol", "The Stockholm Convention on Persistent Organic Pollutants", "The United Nations Framework Convention on Climate Change (UNFCCC)"], "answer": 3}, {"q": "What is the name of the process to clean water using filters?", "options": ["Rainwater harvesting", "Sublimation", "Purification", "Oxidation"], "answer": 2}, {"q": "In which year the term Ecosystem was used first?", "options": ["1935", "1925", "1922", "1930"], "answer": 0}, {"q": "How many percentages of the world is occupied by the savanna region?", "options": ["22%", "25%", "30%", "24%"], "answer": 3}, {"q": "When did Project Tiger was launched?", "options": ["1980", "1975", "1973", "1982"], "answer": 2}, {"q": "What is the percentage of energy transformation from one nutritional order to another nutritional order in a food chain system?", "options": ["20%", "15%", "10%", "25%"], "answer": 2}, {"q": "How many hotspots are recognized in the world?", "options": ["Nearly 35", "Nearly 25", "Nearly 15", "Nearly 30"], "answer": 3}, {"q": "What is the percentage of India's contributions to global biodiversity?", "options": ["8%", "10%", "15%", "20%"], "answer": 0}, {"q": "When did the Ozone hole discovered firstly?", "options": ["1975", "1982", "1980", "1985"], "answer": 3}, {"q": "What should be the intensity of sound permitted regarding the safe noise level for a city?", "options": ["45db", "30db", "20db", "25db"], "answer": 0}, {"q": "Which country is called Country of Lakes?", "options": ["India", "Ausraila", "Finland", "USA"], "answer": 2}, {"q": "In which year the Environmental Protection Act was passed in India?", "options": ["1975", "1980", "1970", "1986"], "answer": 3}];
+
+let quizQuestions = [];
+let current = 0;
+let answers = []; // {qIndex, selected, correct}
+let selectedThisQ = null;
+let sessionQuestionIds = [];
+
+const el = id => document.getElementById(id);
+const THEME_KEY = 'ehQuizTheme';
+function applyTheme(dark){
+  document.body.classList.toggle('dark', dark);
+  const label = dark ? '☀ Light mode' : '☾ Dark mode';
+  el('themeToggleIntro').textContent = label;
+  el('themeToggleQuiz').textContent = dark ? '☀' : '☾';
+  localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+}
+const savedTheme = localStorage.getItem(THEME_KEY);
+applyTheme(savedTheme === 'dark');
+el('themeToggleIntro').addEventListener('click',()=>applyTheme(!document.body.classList.contains('dark')));
+el('themeToggleQuiz').addEventListener('click',()=>applyTheme(!document.body.classList.contains('dark')));
+
+function shuffledQuestion(original){
+  const order = shuffle(original.options.map((text,index)=>({text,correct:index===original.answer})));
+  return {...original, options:order.map(x=>x.text), answer:order.findIndex(x=>x.correct)};
+}
+function memoryCue(q){
+  const rules = [
+    [/greenhouse|global warming|climate change/i,'greenhouse'],[/indoor air|homes/i,'indoor'],[/ground-level ozone|ozone.*formed/i,'ozone'],[/particulate matter/i,'particles'],[/acid rain/i,'acid rain'],[/vehicle|transportation|emission control/i,'vehicles'],
+    [/land pollution|soil pollution|leaching|groundwater/i,'land'],[/waste segregation|waste management/i,'segregation'],[/water pollution|water bodies|aquatic/i,'water'],[/eutrophication/i,'algae'],[/radioactive|radiation|nuclear|half-life|fukushima/i,'radiation'],
+    [/hiv|aids|unaids|antiretroviral|cd4/i,'HIV'],[/population|fertility|births|demographic|urbanization/i,'population'],[/wildlife|tiger|poaching|sanctuar|schedule/i,'wildlife'],[/environmental protection act|polluter pays|environmental impact|EIA|CPCB/i,'environment law'],
+    [/ecosystem|food chain|nutritional order/i,'ecosystem'],[/savanna/i,'savanna'],[/hotspots|biodiversity/i,'biodiversity'],[/ozone hole/i,'ozone hole'],[/sound|noise level/i,'decibels'],[/country of lakes/i,'lakes']
+  ];
+  for(const [re,word] of rules) if(re.test(q.q)) return word;
+  const words=q.q.replace(/[^a-zA-Z ]/g,'').split(/\s+/).filter(w=>w.length>5);
+  return words.sort((a,b)=>b.length-a.length)[0] || 'clue';
+}
+function renderCueText(q){
+  const text=q.q, cue=memoryCue(q), at=text.toLowerCase().indexOf(cue.toLowerCase());
+  const node=el('qText'); node.textContent='';
+  if(at<0){node.textContent=text;return cue;}
+  node.append(document.createTextNode(text.slice(0,at)));
+  const mark=document.createElement('span');mark.className='cue-word';mark.textContent=text.slice(at,at+cue.length);node.append(mark,document.createTextNode(text.slice(at+cue.length)));
+  return cue;
+}
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  el('screen-' + name).classList.add('active');
+  el('topBar').style.display = (name === 'quiz') ? 'block' : 'none';
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---- Intro screen setup ----
+el('bankSize').textContent = BANK.length;
+const lengthChoices = [10, 20, 30, BANK.length];
+let chosenLen = 10;
+const lenWrap = el('lenOptions');
+lengthChoices.forEach((n, i) => {
+  const b = document.createElement('button');
+  b.className = 'len-btn' + (n === chosenLen ? ' selected' : '');
+  b.textContent = (n === BANK.length) ? ('All ' + n) : n;
+  b.dataset.n = n;
+  b.addEventListener('click', () => {
+    chosenLen = n;
+    document.querySelectorAll('.len-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected');
+  });
+  lenWrap.appendChild(b);
+});
+
+el('startBtn').addEventListener('click', startQuiz);
+el('retryBtn').addEventListener('click', () => {
+  startQuizWithQuestions(quizQuestions.map(q => q));
+});
+el('newSetBtn').addEventListener('click', () => {
+  showScreen('intro');
+});
+
+function startQuiz(){
+  let seen=[];
+  try{seen=JSON.parse(localStorage.getItem('ehQuizSeen')||'[]')}catch(e){seen=[]}
+  let available=BANK.map((q,id)=>({...q,bankId:id})).filter(q=>!seen.includes(q.bankId));
+  if(available.length<chosenLen){seen=[];available=BANK.map((q,id)=>({...q,bankId:id}));}
+  const picked=shuffle(available).slice(0,chosenLen);
+  seen=seen.concat(picked.map(q=>q.bankId));
+  localStorage.setItem('ehQuizSeen',JSON.stringify(seen));
+  sessionQuestionIds=picked.map(q=>q.bankId);
+  startQuizWithQuestions(picked);
+}
+
+function startQuizWithQuestions(list){
+  quizQuestions = shuffle(list).map(shuffledQuestion);
+  current = 0;
+  answers = new Array(quizQuestions.length).fill(null);
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = quizQuestions[current];
+  selectedThisQ = answers[current] ? answers[current].selected : null;
+
+  el('qTag').textContent = 'QUESTION ' + (current + 1) + ' OF ' + quizQuestions.length;
+  const cue = renderCueText(q);
+  el('cueNote').textContent = 'CLUE WORD: ' + cue + ' · Use this anchor to connect the question to the concept.';
+  el('progressCount').textContent = (current + 1) + ' / ' + quizQuestions.length;
+  el('progressFill').style.width = Math.round(((current) / quizQuestions.length) * 100) + '%';
+
+  const wrap = el('qOptions');
+  wrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+
+  q.options.forEach((optText, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = '<span class="tag">' + letters[idx] + '</span><span class="txt"></span>';
+    btn.querySelector('.txt').textContent = optText;
+    btn.addEventListener('click', () => selectOption(idx));
+    wrap.appendChild(btn);
+  });
+
+  if(answers[current] !== null){
+    revealAnswer();
+  } else {
+    el('nextBtn').disabled = true;
+    el('nextBtn').textContent = 'Answer to continue';
+    el('feedback').style.display = 'none';
+  }
+}
+
+function selectOption(idx){
+  if(answers[current] !== null) return; // already answered
+  const q = quizQuestions[current];
+  const correct = (idx === q.answer);
+  answers[current] = { selected: idx, correct: correct };
+  revealAnswer();
+}
+
+function revealAnswer(){
+  const q = quizQuestions[current];
+  const a = answers[current];
+  const opts = el('qOptions').querySelectorAll('.opt');
+  opts.forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if(idx === q.answer){
+      btn.classList.add('correct');
+    }
+    if(a && idx === a.selected && idx !== q.answer){
+      btn.classList.add('wrong');
+    }
+    if(a && idx === a.selected){
+      btn.classList.add('selected');
+    }
+  });
+  el('nextBtn').disabled = false;
+  el('nextBtn').textContent = (current === quizQuestions.length - 1) ? 'See report' : 'Next question';
+
+  const letters = ['A','B','C','D'];
+  const fb = el('feedback');
+  fb.style.display = 'flex';
+  if(a && a.correct){
+    fb.className = 'feedback good';
+    fb.innerHTML = '<span class="ic">✓</span><span class="txt">Correct!<b class="memory-line"></b></span>';
+  } else {
+    fb.className = 'feedback bad';
+    fb.innerHTML = '<span class="ic">✕</span><span class="txt">Incorrect<b>Correct answer: ' + letters[q.answer] + '. ' + escapeHtml(q.options[q.answer]) + '</b><b class="memory-line"></b></span>';
+  }
+  const memoryLine=fb.querySelector('.memory-line');
+  if(memoryLine) memoryLine.textContent='Memory link: “'+memoryCue(q)+'” → '+q.options[q.answer];
+}
+
+el('nextBtn').addEventListener('click', () => {
+  if(answers[current] === null) return;
+  if(current < quizQuestions.length - 1){
+    current++;
+    renderQuestion();
+  } else {
+    el('progressFill').style.width = '100%';
+    showReport();
+  }
+});
+
+function showReport(){
+  const total = quizQuestions.length;
+  const correctCount = answers.filter(a => a && a.correct).length;
+  const pct = Math.round((correctCount / total) * 100);
+
+  el('scorePct').textContent = pct + '%';
+  el('scoreFrac').textContent = correctCount + ' of ' + total + ' correct';
+
+  const verdictEl = el('scoreVerdict');
+  verdictEl.classList.remove('high','mid','low');
+  if(pct >= 75){ verdictEl.textContent = 'Strong grasp'; verdictEl.classList.add('high'); }
+  else if(pct >= 50){ verdictEl.textContent = 'Getting there'; verdictEl.classList.add('mid'); }
+  else{ verdictEl.textContent = 'Needs review'; verdictEl.classList.add('low'); }
+
+  const list = el('reviewList');
+  list.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  quizQuestions.forEach((q, i) => {
+    const a = answers[i];
+    const item = document.createElement('div');
+    item.className = 'review-item' + (a && a.correct ? ' ok' : '');
+    const rq = document.createElement('div');
+    rq.className = 'rq';
+    rq.textContent = (i+1) + '. ' + q.q;
+    item.appendChild(rq);
+    const ra = document.createElement('div');
+    ra.className = 'ra';
+    if(a && a.correct){
+      ra.innerHTML = '<span class="ans">✓ ' + letters[q.answer] + '. ' + escapeHtml(q.options[q.answer]) + '</span>';
+    } else {
+      const yourText = a ? (letters[a.selected] + '. ' + escapeHtml(q.options[a.selected])) : '(skipped)';
+      ra.innerHTML = 'Your answer: <span class="your">' + yourText + '</span><br>Correct: <span class="ans">' + letters[q.answer] + '. ' + escapeHtml(q.options[q.answer]) + '</span>';
+    }
+    item.appendChild(ra);
+    list.appendChild(item);
+  });
+
+  showScreen('report');
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
